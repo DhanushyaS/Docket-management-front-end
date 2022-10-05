@@ -1,0 +1,40 @@
+.textarea{
+    width: 100%;
+    min-height: 90% ;
+}
+
+.textarea:active{
+    border: none;
+}
+
+.desc{
+    font-size: small;
+}
+
+.dark{
+    background-color: rgb(46, 45, 45);
+}
+
+.content{
+color: rgb(202, 202, 202);
+}
+
+.content:hover{
+    color:white;
+    cursor: pointer;
+}
+.preview{
+    position: fixed;
+    z-index: 2;
+    top: 20px;
+    right: 10px;
+    max-height: 90%;
+    width: 73%;
+    background-color: gray;
+    overflow: hidden;
+}
+
+.img{
+    overflow: hidden;
+    width: 100%;
+}
