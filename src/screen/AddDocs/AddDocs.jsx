@@ -14,7 +14,7 @@ function AddDocs() {
     e.preventDefault()
     await axios({
       method: 'post',
-      url: `http://localhost:4000/doc/${user._id}/adddocs`,
+      url: `https://docket-management.herokuapp.com/doc/${user._id}/adddocs`,
       data: {name,description}
     }).then((res)=>{
       console.log(res);

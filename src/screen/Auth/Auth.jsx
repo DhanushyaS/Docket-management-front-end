@@ -17,7 +17,7 @@ function Auth() {
     e.preventDefault()
     await axios({
       method: 'post',
-      url: 'http://localhost:4000/user/login',
+      url: 'https://docket-management.herokuapp.com/user/login',
       data: {email,password}
     }).then(
       (res)=>{
@@ -27,10 +27,11 @@ function Auth() {
     ).catch((err)=>console.log(err))
     const user = JSON.parse(localStorage.getItem("user"));
 
-    await axios.get(`http://localhost:4000/doc/${user._id}`)  
+    await axios.get(`https://docket-management.herokuapp.com/doc/${user._id}`)  
     .then(res => {   
       console.log(res)
       localStorage.setItem("document",JSON.stringify(res.data.document))  
+      navigate("/")
     }) 
 
   }
@@ -39,14 +40,16 @@ function Auth() {
     if(password===confirmPassword){
       await axios({
         method: 'post',
-        url: 'http://localhost:4000/user/signup',
+        url: 'https://docket-management.herokuapp.com/user/signup',
         data: {name,email,mobile,type,password}
       }).then(
         (res)=>{console.log(res)
           localStorage.setItem("user", JSON.stringify(res.data.result));
-          navigate("/")
+        navigate("/")
+          
       }
       ).catch((err)=>console.log(err))
+
     }else{
         alert('Invalid Creditials: Check Password')
     }

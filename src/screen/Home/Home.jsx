@@ -12,6 +12,9 @@ function Home() {
     setDocument(JSON.parse(localStorage.getItem("document")));
   }, [documents]);
   const user = localStorage.getItem("user");
+  if(!user){
+    navigate('/auth')
+  }
   const handleLogOut = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("document");
