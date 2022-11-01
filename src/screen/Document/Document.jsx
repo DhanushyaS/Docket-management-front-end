@@ -13,7 +13,13 @@ function Document() {
   const doc_id=id
   axios.get(`https://docket-management.herokuapp.com/doc/docs/${doc_id}`)  
     .then(res => {  
+      
       setDoc(res.data)
+      if(user.name==doc.owner){
+      setOwner(true)
+  }else{
+    setOwner(false)
+  }
     })
 
     const [img, setImage] = useState({ title: '', image: '' });
@@ -33,6 +39,7 @@ function Document() {
   const [prev, setPrevURL] = useState('')
   const [shareID, setShareID] = useState('')
   const [selectedImg, setSelectedImg] = useState('')
+  const [owner,setOwner]=useState(false)
   const contentChange=event=>{
     setContent(event.target.value)
   }
@@ -85,6 +92,8 @@ function Document() {
     })
   }
 
+
+
   return (
     <div className='row mx-0'>
         <div className="col-md-3 dark text-light border-end border-secondary vh-100">
@@ -92,18 +101,38 @@ function Document() {
           <div>
             <div className='m-3 fs-4 fw-bold'>{doc?doc.name:"Title"}</div>
           </div>
+          {owner &&
             <div className='m-3' onClick={()=>setShowShareForm(true)}>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share-fill" viewBox="0 0 16 16">
   <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5z"/>
-</svg>            </div>
+</svg>            </div>}
+     {!owner &&
+                  <div className='m-2' >
+                  <svg onClick={async()=>{
+                     await axios({
+      method: 'get',
+      url: `https://docket-management.herokuapp.com/doc/remove/${user._id}/${doc_id}`,
+    }).then(async(r) => {  
+      console.log(r)
+      await axios.get(`https://docket-management.herokuapp.com/doc/share/${user._id}`)  
+    .then(res => {   
+      localStorage.setItem("received",JSON.stringify(res.data.received))  
+      
+      navigate("/")
+    }) 
+    })
+                  }} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/></svg>
+                  </div>
+                  }
           </div>
           <div className='desc mx-3'>{doc?doc.description:"Document Description"}</div>
           <div className='m-3 mt-5 fs-5 fw-bolder d-flex align-items-center justify-content-between'>
             <div>Documents</div>
             <div className='d-flex align-items-center'>
               <div className='mx-2' onClick={handleAddSubDocs}>
+              {owner &&
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-plus" viewBox="0 0 16 16"><path d="M8 6.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V11a.5.5 0 0 1-1 0V9.5H6a.5.5 0 0 1 0-1h1.5V7a.5.5 0 0 1 .5-.5z"/><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/></svg>
-              </div>
+               } </div>
               <div onClick={toggleDocsView} className="mx-2">
               {showDocs?
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
@@ -124,11 +153,13 @@ function Document() {
               <div className='d-flex align-items-center justify-content-between my-1' key={index}>
                 <div>{ele.name}</div>
                 <div className='d-flex align-items-center'>
+                {owner && 
                   <div className='mx-2' onClick={()=>{setShowEditSub(true)
                     setSubName(ele.name)
                     setSubDocID(ele._id)}}>
                     <svg  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
-                  </div>
+                  </div>}
+                  {owner &&
                   <div className='mx-2' >
                   <svg onClick={async()=>{
                      await axios({
@@ -139,6 +170,7 @@ function Document() {
     })
                   }} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/></svg>
                   </div>
+                  }
                 </div>
               </div>
               <div className='row'>
@@ -179,6 +211,7 @@ function Document() {
           
           }
             <div className='d-flex justify-content-between'>
+            {owner &&
               <button className='btn btn-danger ' onClick={async()=>{
                 await axios({
       method: 'get',
@@ -193,8 +226,9 @@ function Document() {
       navigate('/')
     }) 
 
-              }}>Delete the document</button>
-              <button className='btn btn-success ' onClick={handleEditContent}>Save</button>
+              }}>Delete the document</button>}
+               {owner &&
+              <button className='btn btn-success ' onClick={handleEditContent}>Save</button>}
             </div>
           </div> :
 
@@ -217,7 +251,9 @@ function Document() {
 
                   </div>
                 </div>
+                {owner &&
                 <div className='btn btn-success ' onClick={()=>setImageForm(true)}>Add Image</div>
+                }
                 {prevVisible &&
                 
                 <div className='preview p-2'>
@@ -226,6 +262,7 @@ function Document() {
                   </div>
                   <div className='img'>
                   <img className='img-fluid img ' src={prev} alt="" />
+                  {owner &&
                   <button className='btn btn-danger my-3' onClick={
                     async()=>{
                       console.log(doc_id,subdocID,selectedImg)
@@ -239,7 +276,7 @@ function Document() {
     })
                     }
                   }>Delete</button>
-
+                  }
                   </div>
                 </div>
                 }
