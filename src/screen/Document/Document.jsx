@@ -29,7 +29,10 @@ function Document() {
   const [showImageForm, setImageForm] = useState(false)
   const [subImage,setSubImage] = useState([])
   const [showEditSub,setShowEditSub]=useState(false)
+  const [showShareForm,setShowShareForm]=useState(false)
   const [prev, setPrevURL] = useState('')
+  const [shareID, setShareID] = useState('')
+  const [selectedImg, setSelectedImg] = useState('')
   const contentChange=event=>{
     setContent(event.target.value)
   }
@@ -89,9 +92,10 @@ function Document() {
           <div>
             <div className='m-3 fs-4 fw-bold'>{doc?doc.name:"Title"}</div>
           </div>
-            <div className='m-3'>
-              {/* <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16"> <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg> */}
-            </div>
+            <div className='m-3' onClick={()=>setShowShareForm(true)}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share-fill" viewBox="0 0 16 16">
+  <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5z"/>
+</svg>            </div>
           </div>
           <div className='desc mx-3'>{doc?doc.description:"Document Description"}</div>
           <div className='m-3 mt-5 fs-5 fw-bolder d-flex align-items-center justify-content-between'>
@@ -203,6 +207,7 @@ function Document() {
                       <img height='220px' onClick={()=>{
                         setPrevURL(ele.image)
                         setPrevVisible(!prevVisible)
+                        setSelectedImg(ele._id)
                       }} className='img-fluid' src={ele.image} alt="" />
                       <div className='text-center my-2'>{ele.title}</div>
                   </div>
@@ -221,6 +226,19 @@ function Document() {
                   </div>
                   <div className='img'>
                   <img className='img-fluid img ' src={prev} alt="" />
+                  <button className='btn btn-danger my-3' onClick={
+                    async()=>{
+                      console.log(doc_id,subdocID,selectedImg)
+                      await axios({
+      method: 'get',
+      url: `https://docket-management.herokuapp.com/doc/image/${doc_id}/${subdocID}/${selectedImg}`,     
+    }).then(res => {  
+      setDoc(res.data)
+      console.log(res)
+      setPrevVisible(false)
+    })
+                    }
+                  }>Delete</button>
 
                   </div>
                 </div>
@@ -275,6 +293,30 @@ function Document() {
             }}>Edit</button>
           </div>
 
+          }
+          {
+            showShareForm &&
+            <div className='bg-dark m-4 p-3 subdoc'>
+          <div className='text-end'>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" onClick={()=>setShowShareForm(false)} className="bi bi-x-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+          </div>
+            <label htmlFor="subdoc" className='form-label mb-4'>Share to :</label>
+            <input type="text" className='form-control mb-4' value={shareID} onChange={(e)=>setShareID(e.target.value)} placeholder="Email" />
+            <button className='btn btn-success' onClick={async()=>{
+              await axios({
+      method: 'post',
+      url: `https://docket-management.herokuapp.com/doc/share/${doc_id}`,
+       data:{email:shareID}         
+    }).then(res => {  
+      console.log(res)
+      setShowShareForm(false)
+    }).catch((e)=>{
+      console.log(e)
+      alert('Document not shared')
+      setShowShareForm(false)
+    })
+            }}>Share</button>
+          </div>
           }
           
         </div>

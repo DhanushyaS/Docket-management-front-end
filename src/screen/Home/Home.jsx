@@ -1,30 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from 'axios'
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
   const [documents, setDocument] = useState();
+  const [select, setSelect] = useState('my');
   const navigate = useNavigate();
   // let documents
   useEffect(() => {
     //  documents=JSON.parse(localStorage.getItem("document"))
     setDocument(JSON.parse(localStorage.getItem("document")));
   }, [documents]);
-  const user = localStorage.getItem("user");
+  const user = JSON.parse(localStorage.getItem("user"));
+  const received = JSON.parse(localStorage.getItem("received"));
+  console.log(received);
+
   if(!user){
     navigate('/auth')
   }
   const handleLogOut = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("document");
+    localStorage.removeItem("received");
     navigate("/auth");
   };
 
+  const handleCheck = async()=>{
+    await axios.get(`https://docket-management.herokuapp.com/doc/share/${user._id}`)  
+    .then(res => {   
+      localStorage.setItem("received",JSON.stringify(res.data.received))  
+      
+      navigate("/")
+    }) 
+  }
+
   return (
     <div className="container my-5">
-      <div className="mx-5 d-flex justify-content-end">
-        <div className="col-8 px-3 ">
+      <div className="row mx-5 d-flex justify-content-end">
+        <div className="col-6 px-3 ">
           <div class="input-group mb-3">
             <input
               type="text"
@@ -56,7 +71,13 @@ function Home() {
             <button className="btn btn-success">Add Docs</button>
           </Link>
         </div>
-        <div className="col-2">
+        <div className="col-2 ms-0 ">
+          <select className="form-select" value={select} onChange={(e)=>setSelect(e.target.value)} >
+            <option value="my">My Document</option>
+            <option value="received">Received Document</option>
+          </select>
+        </div>
+        <div className="col-2 mt-2">
           {user ? (
             <div onClick={handleLogOut}>LOGOUT</div>
           ) : (
@@ -66,6 +87,9 @@ function Home() {
           )}
         </div>
       </div>
+            {
+              select=='my'?
+      <div>
       {documents ? (
         <div className="row">
           {documents.map((ele, index) => {
@@ -91,6 +115,37 @@ function Home() {
         </div>
         </div>
       )}
+      </div>:
+      <div>
+        <button className="btn btn-secondary" onClick={handleCheck}>Check</button>
+        {received ? (
+        <div className="row">
+          {received.map((ele, index) => {
+            const link=`/docs/${ele._id}`
+            return (
+              <div className="col-md-4 p-5 " key={index}>
+                <Link to={link} className="link">
+                  <div class="card shadow home-card">
+                    <div class="card-body">
+                      <h3 className="heading">{ele.name}</h3>
+                      <p>{ele.description}</p>
+                      <p><em>shared by</em><i> {ele.owner}</i></p>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="d-flex justify-content-center align-items-center mt-5 pt-5">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        </div>
+      )}
+      </div>
+            }
     </div>
   );
 }

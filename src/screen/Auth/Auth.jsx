@@ -24,7 +24,8 @@ function Auth() {
         localStorage.setItem("user", JSON.stringify(res.data.result));
         navigate("/")
     }
-    ).catch((err)=>console.log(err))
+    ).catch((err)=>{console.log(err)
+    alert("Invalid Credential")})
     const user = JSON.parse(localStorage.getItem("user"));
 
     await axios.get(`https://docket-management.herokuapp.com/doc/${user._id}`)  
@@ -48,7 +49,10 @@ function Auth() {
         navigate("/")
           
       }
-      ).catch((err)=>console.log(err))
+      ).catch((err)=>{
+        console.log(err)
+        alert("Invalid Credential") 
+      })
 
     }else{
         alert('Invalid Creditials: Check Password')
@@ -57,7 +61,8 @@ function Auth() {
 
   return (
     <div>
-            <div class="container my-5">
+      <h2 className='text-center my-4 text-primary fw-bold'>Docket Management</h2>
+            <div class="container my-4">
         <div class="row d-flex justify-content-center align-items-center">
             <div class="col-md-6">
                 <img src="https://elearn.daffodilvarsity.edu.bd/pluginfile.php/1044535/mod_assign/intro/f5100f72b303d6e5be8357d02a8dbb5e.gif" className="img-fluid vh-100" alt="..." />
