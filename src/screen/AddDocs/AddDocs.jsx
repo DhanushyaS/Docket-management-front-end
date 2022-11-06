@@ -7,15 +7,17 @@ function AddDocs() {
   const navigate = useNavigate();
   const [name,setName]=useState('');
   const [description, setDescription]=useState('');
+  
 
   const user = JSON.parse(localStorage.getItem("user"));
-
+console.log(user)
   const handleSubmit=async(e)=>{
     e.preventDefault()
+    const owner=user.name
     await axios({
       method: 'post',
-      url: `http://localhost:4000/doc/${user._id}/adddocs`,
-      data: {name,description}
+      url: `https://docket-management.herokuapp.com/doc/${user._id}/adddocs`,
+      data: {name,description,owner}
     }).then((res)=>{
       console.log(res);
       localStorage.setItem("document",JSON.stringify(res.data.document))
@@ -28,6 +30,7 @@ function AddDocs() {
 
   return (
     <div className='container my-5'>
+     <h2 className='text-center my-5 text-primary fw-bold'>Add Document</h2>
               <div className='row d-flex align-items-center'>
               <div className='col-md-6'>
                 <img src="https://cdn.dribbble.com/users/644659/screenshots/2396791/icon-1.gif" style={{width:'90%'}} />
